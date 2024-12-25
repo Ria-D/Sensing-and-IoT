@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Inventory App</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1E1E2E;
+            color: #F8F8F2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 120vh; /* Ensure the body takes at least full viewport height */
+            overflow-y: auto; /* Allow vertical scrolling */
+        }
+        
+        
+        html {
+        scroll-behavior: smooth;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #FFFFFF;
+        }
+
+        /* Home Screen */
+        .container {
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .card {
+            background-color: #282A36;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #D4D4D4;
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #BD93F9;
+        }
+
+        /* Inventory and Recipe Screens */
+        .screen {
+            display: none;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border-bottom: 1px solid #44475A;
+            padding: 10px;
+            color: #F8F8F2;
+        }
+
+        th {
+            text-align: left;
+            color: #BD93F9;
+        }
+
+        /* Refresh Button */
+        #refreshInventoryBtn, #findRecipesBtn, #goBackBtn, #goBackFromSpeechBtn {
+            background-color: #695289;
+            color: #F8F8F2;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 8px;
+        }
+
+        #refreshInventoryBtn:hover, #findRecipesBtn:hover {
+            background-color: #A088F0;
+        }
+
+        /* Recipe Display */
+        .recipes-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .recipe-card {
+            background-color: #282A36;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .recipe-card h3 {
+            font-size: 1rem;
+            margin: 10px 0;
+            color: #F8F8F2;
+        }
+
+        .recipe-card button {
+            background-color: #BD93F9;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .recipe-card button:hover {
+            background-color: #A088F0;
+        }
+        
+        .button-container {
+            display: flex; /* flexbox displays the buttons in a row */
+            gap: 10px; /* Adding space between the buttons */
+            justify-content: center; /* Centers the buttons horizontally */
+        }
+
+        /* Missing Ingredients Screen */
+        #missingIngredientsScreen table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        #missingIngredientsScreen th, #missingIngredientsScreen td {
+            border-bottom: 1px solid #44475A;
+            padding: 10px;
+            color: #F8F8F2;
+        }
+
+        #missingIngredientsScreen th {
+            text-align: left;
+            color: #BD93F9;
+        }
+
+        /* Footer Navigation */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #44475A;
+            display: flex;
+            justify-content: center;
+        }
+
+        .footer-nav button {
+            background: none;
+            border: none;
+            color: #F8F8F2;
+            font-size: 16px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .footer-nav button:hover {
+            color: #BD93F9;
+        }
+
+        #loginScreen input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #44475A;
+            border-radius: 8px;
+            background-color: #282A36;
+            color: #F8F8F2;
+        }
+
+        #loginScreen button {
+            background-color: #695289;
+            color: #F8F8F2;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        #loginScreen button:hover {
+            background-color: #A088F0;
+        }
+
+        #logoutBtn {
+            background-color: #FF5555;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            color: #FFFFFF;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        #logoutBtn:hover {
+            background-color: #FF79C6;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="loginScreen">
+    <h1>Login</h1>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button id="loginBtn">Login</button>
+    <div id="loginError" style="color: red; margin-top: 10px;"></div>
+</div>
+
+
+
+
+
+<div class="container">
+    <!-- Home Screen -->
+    <div id="homeScreen">
+        <h1>Welcome, Ria! 👋</h1>
+        <div class="card" id="showInventoryBtn">
+            <div class="card-icon">📋</div>
+            <div class="card-title">View Inventory</div>
+        </div>
+        <div class="card" id="makeRecipesBtn">
+            <div class="card-icon">🍳</div>
+            <div class="card-title">Create Recipes</div>
+        </div>
+        <div class="card" id="speechBtn">
+            <div class="card-icon">🎤</div>
+            <div class="card-title">Speech</div>
+        </div>
+        <div id="recordingIconContainer" style="display: none;">
+            <div class="card-icon">🎙️</div>
+            <div class="card-title">Recording...</div>
+        </div>
+    </div>
+
+    <!-- Inventory Screen -->
+    <div class="screen" id="inventoryScreen">
+        <h1>Your Inventory</h1>
+        <div id="output" class="timestamp"></div>
+        <button id="refreshInventoryBtn"> Refresh</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody id="inventoryBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Recipes Screen -->
+    <div class="screen" id="recipesScreen">
+        <h1>Find Recipes 🍳</h1>
+        <p>Click to find recipes based on your inventory:</p>
+        <button id="findRecipesBtn">Find Recipes</button>
+        <div class="recipes-container" id="recipesOutput"></div>
+    </div>
+
+    
+
+    <!-- Missing Ingredients Screen -->
+    <div class="screen" id="missingIngredientsScreen">
+        <h1>Missing Ingredients</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ingredient</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody id="missingIngredientsTableBody">
+                <!-- Missing ingredients will be dynamically inserted here -->
+            </tbody>
+        </table>
+        <button id="goBackBtn">Back</button>
+    </div>
+
+    <!-- Recipes by Speech Screen -->
+    <div class="screen" id="recipesBySpeechScreen">
+        <h1>Recording... 🎙️</h1>
+        <div class="recipes-container" id="recipesBySpeechOutput"></div>
+        <button id="goBackFromSpeechBtn">Back</button>
+    </div>
+</div>
+
+<!-- Footer Navigation -->
+<div class="footer-nav">
+    <button id="goHomeBtn">🏠 Home</button>
+</div>
+
+
+
+<script>
+    const homeScreen = document.getElementById('homeScreen');
+    const inventoryScreen = document.getElementById('inventoryScreen');
+    const recipesScreen = document.getElementById('recipesScreen');
+    const showInventoryBtn = document.getElementById('showInventoryBtn');
+    const makeRecipesBtn = document.getElementById('makeRecipesBtn');
+    const goHomeBtn = document.getElementById('goHomeBtn');
+    const inventoryBody = document.getElementById('inventoryBody');
+    const output = document.getElementById('output');
+    const refreshInventoryBtn = document.getElementById('refreshInventoryBtn');
+    const recipesOutput = document.getElementById('recipesOutput');
+    const findRecipesBtn = document.getElementById('findRecipesBtn');
+    const missingIngredientsScreen = document.getElementById('missingIngredientsScreen');
+    const missingIngredientsTableBody = document.getElementById('missingIngredientsTableBody');
+    const goBackBtn = document.getElementById('goBackBtn');
+    const speechBtn = document.getElementById('speechBtn');
+    const recipesBySpeechScreen = document.getElementById('recipesBySpeechScreen');
+    const recipesBySpeechOutput = document.getElementById('recipesBySpeechOutput');
+    const goBackFromSpeechBtn = document.getElementById('goBackFromSpeechBtn');
+    const loginScreen = document.getElementById('loginScreen');
+    const loginBtn = document.getElementById('loginBtn');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginError = document.getElementById('loginError');
+    const userNameSpan = document.getElementById('userName');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    showInventoryBtn.onclick = () => showScreen('inventory');
+    makeRecipesBtn.onclick = () => showScreen('recipes');
+    goHomeBtn.onclick = () => showScreen('home');
+    refreshInventoryBtn.onclick = loadInventory;
+    goBackBtn.onclick = () => showScreen('recipes');
+
+
+    // Show login screen if not authenticated
+    if (localStorage.getItem('token')) {
+        loginScreen.style.display = 'block';
+        homeScreen.style.display = 'none';
+    } else {
+        loginScreen.style.display = 'none';
+        homeScreen.style.display = 'block';
+        userNameSpan.textContent = localStorage.getItem('username');
+    }
+
+    // Login function
+    loginBtn.onclick = async () => {
+        const username = usernameInput.value;
+        const password = passwordInput.value;
+
+        // Basic validation
+        if (!username || !password) {
+            loginError.textContent = 'Please enter both username and password.';
+            return;
+        }
+
+        // Send login request to backend
+        const response = await fetch('http://192.168.1.59:5000/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            localStorage.setItem('token', result.token);
+            localStorage.setItem('username', result.username);
+            loginScreen.style.display = 'none';
+            homeScreen.style.display = 'block';
+            userNameSpan.textContent = result.username;
+        } else {
+            loginError.textContent = result.message || 'Login failed!';
+        }
+    };
+
+
+
+
+    function showScreen(screen) {
+        homeScreen.style.display = screen === 'home' ? 'block' : 'none';
+        inventoryScreen.style.display = screen === 'inventory' ? 'block' : 'none';
+        recipesScreen.style.display = screen === 'recipes' ? 'block' : 'none';
+        missingIngredientsScreen.style.display = screen === 'missingIngredients' ? 'block' : 'none';
+        recipesBySpeechScreen.style.display = screen === 'recipesBySpeech' ? 'block' : 'none';
+
+
+        if (screen === 'inventory') loadInventory();
+    }
+
+    async function loadInventory() {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://192.168.1.59:5000/api/inventory', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const inventory = await response.json();
+        const items = inventory.inventory;
+
+        output.innerHTML = `Last updated: ${inventory.timestamp}`;
+        inventoryBody.innerHTML = Object.entries(items).map(([ingredient, quantity]) => `
+            <tr>
+                <td>${ingredient}</td>
+                <td>${quantity}</td>
+            </tr>
+        `).join('');
+    }
+
+    findRecipesBtn.onclick = async () => {
+        const token = localStorage.getItem('token');
+        
+        // Check if the token is present, if not, log an error and return
+        if (!token) {
+            console.error("No token found, user is not logged in");
+            return;
+        }
+
+        // Fetch inventory (with token)
+        const inventoryResponse = await fetch('http://192.168.1.59:5000/api/inventory', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        // Load ingredients from inventory
+        const ingredients = Object.keys((await inventoryResponse.json()).inventory);
+
+        // Fetch recipes (with token in Authorisation header)
+        const response = await fetch('http://192.168.1.59:5000/api/recipes', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`  // Includes the token here
+            },
+            body: JSON.stringify({ ingredients })
+        });
+
+        // Handle the recipes response
+        const { recipes } = await response.json();
+        recipesOutput.innerHTML = recipes.map((recipe, index) => `
+            <div class="recipe-card">
+                <h3>${index + 1}. ${recipe.title}</h3>
+                <div class="button-container">
+                    <a href="${recipe.sourceUrl}" target="_blank">
+                        <button>Full Recipe</button>
+                    </a>
+                    <button id="missingIngredientsBtn" data-recipe-id="${recipe.id}">Missing Ingredients</button>
+                </div>
+            </div>
+        `).join('');
+
+        // Set up "Missing Ingredients" buttons
+        const missingIngredientsBtns = document.querySelectorAll('#missingIngredientsBtn');
+        missingIngredientsBtns.forEach(button => {
+            button.onclick = async (event) => {
+                const recipeId = event.target.getAttribute('data-recipe-id');
+                showMissingIngredients(recipeId);
+            };
+        });
+    };
+
+
+    async function showMissingIngredients(recipeId) {
+    // Show loading message
+    missingIngredientsTableBody.innerHTML = 'Loading missing ingredients...';
+
+    // Fetch user's current inventory
+    
+    const inventoryResponse = await fetch('http://192.168.1.59:5000/api/inventory', {
+    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+});
+    const inventoryData = await inventoryResponse.json();
+    const userInventory = inventoryData.inventory;
+
+    // Helper function to process ingredient names
+    const normalizeName = (name) => {
+        return name
+            .toLowerCase()
+            .replace(/[^a-z\s]/g, '') // Remove punctuation and special characters
+            .split(' ') // Split into words
+            .filter(word => word.length > 2) // Ignore short words (e.g., "a", "on")
+            .join(' '); // Rejoin simplified words
+    };
+
+    // Fetch recipe ingredients
+    const recipeResponse = await fetch(
+        `https://api.spoonacular.com/recipes/${recipeId}/ingredientWidget.json?apiKey=1d0aedfc722540998bf1b2c9fd8f998d`
+    );
+    const recipeData = await recipeResponse.json();
+
+    // Compare recipe ingredients with user's inventory
+    const missingIngredients = recipeData.ingredients.filter(ingredient => {
+        const recipeIngredientName = normalizeName(ingredient.name);
+
+        // Check if the normalised name partially matches any inventory item
+        return !Object.keys(userInventory).some(inventoryItem => {
+            const normalizedInventoryName = normalizeName(inventoryItem);
+            return recipeIngredientName.includes(normalizedInventoryName) || normalizedInventoryName.includes(recipeIngredientName);
+        });
+    });
+
+    // Update the missing ingredients table
+    missingIngredientsTableBody.innerHTML = '';
+    if (missingIngredients.length > 0) {
+        missingIngredients.forEach(ingredient => {
+            missingIngredientsTableBody.innerHTML += `
+                <tr>
+                    <td>${ingredient.name}</td>
+                    <td>${ingredient.amount.metric.value} ${ingredient.amount.metric.unit}</td>
+                </tr>
+            `;
+        });
+    } else {
+        missingIngredientsTableBody.innerHTML = `
+            <tr>
+                <td colspan="2">You have all the required ingredients! 🎉</td>
+            </tr>
+        `;
+    }
+
+    // Switch to the Missing Ingredients screen
+    missingIngredientsScreen.style.display = 'block';
+    recipesScreen.style.display = 'none';
+}
+
+speechBtn.onclick = () => {
+    // Show the Recipes by Speech screen
+    showScreen('recipesBySpeech');
+
+    // Show the recording icon
+    document.getElementById('recordingIconContainer').style.display = 'block';
+
+    // Start recording speech for 5 seconds
+    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.maxAlternatives = 1;
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.start();
+
+        // Timeout after 5 seconds
+        setTimeout(() => {
+            recognition.stop();
+        }, 5000);
+
+        recognition.onresult = async (event) => {
+            const transcript = event.results[0][0].transcript.toLowerCase();
+            console.log('Speech transcript:', transcript);
+
+            // Process the speech transcript to generate ingredients
+            const ingredients = extractIngredientsFromSpeech(transcript);
+
+            // Call backend to fetch recipes
+            const response = await fetch('http://192.168.1.59:5000/api/recipes_by_speech', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ingredients })
+            });
+
+            const { recipes } = await response.json();
+            displayRecipes(recipes);
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+        };
+
+        // Stop the recording icon when the recognition stops or an error occurs
+        recognition.onend = () => {
+            document.getElementById('recordingIconContainer').style.display = 'none';
+        };
+    } else {
+        alert('Speech Recognition is not supported in this browser.');
+    }
+};
+
+
+
+    goBackFromSpeechBtn.onclick = () => {
+        recipesBySpeechScreen.style.display = 'none';
+        homeScreen.style.display = 'block';
+    };
+
+
+
+
+
+
+
+
+    function extractIngredientsFromSpeech(transcript) {
+        // Example: Extracting ingredients using a simple regex-based approach
+        const ingredientKeywords = ['potato', 'apple', 'banana', 'beans', 'pasta', 'chicken', 'cheese', 'onion', 'bread'];
+        const ingredients = ingredientKeywords.filter(ingredient => transcript.includes(ingredient));
+        return ingredients;
+    }
+
+    function displayRecipes(recipes) {
+        // Display the recipes in the "Recipes by Speech" screen
+        recipesBySpeechOutput.innerHTML = recipes.map(recipe => `
+            <div class="recipe-card">
+                <h3>${recipe.title}</h3>
+                <div class="button-container">
+                    <a href="${recipe.sourceUrl}" target="_blank">
+                        <button>Full Recipe</button>
+                    </a>
+                </div>
+            </div>
+        `).join('');
+        
+        // Show the Recipes by Speech screen and hide the others
+        recipesBySpeechScreen.style.display = 'block';
+        inventoryScreen.style.display = 'none';
+        recipesScreen.style.display = 'none';
+    }
+
+</script>
+
+</body>
+</html>
