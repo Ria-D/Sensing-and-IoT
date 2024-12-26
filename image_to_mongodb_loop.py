@@ -87,7 +87,7 @@ def main():
         image_path = capture_image(save_path)
         if image_path:
             upload_image_to_mongodb(collection, image_path)
-        time.sleep(30)  # Capture and upload every 10 seconds (you can adjust the interval)
+        time.sleep(10)
 
 if __name__ == "__main__":
     main()
